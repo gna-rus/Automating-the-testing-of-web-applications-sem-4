@@ -231,7 +231,37 @@ def find_id(find_id):
             flag = True
     return flag
 #
+#mail
+import smtplib
+from os.path import basename
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
+fromaddr = " address@mail.ru "
+to_address = " addresss@mail.ru "
+mypass = "bypass"
+report_name = "report.xml"
+msg = MIMEMultipart()
+msg['From'] = fromaddr
+msg['To'] = to_address
+msg['Subject'] = "Привет от питона"
+
+#Формирования отчета-файла
+with open(report_name, "rb") as f:
+    part = MIMEApplication(f.read(), Name=basename(report_name))
+    part['Content-Disposition'] = 'attachment; filename="%s"' % basename(report_name)
+    msg.attach(part)
+
+body = "Это пробное сообщение"
+msg.attach(MIMEText(body, 'plain'))
+
+# Передача отчета-файла
+server = smtplib.SMTP_SSL(' smtp.mail.ru ', 465)
+server.login(fromaddr, mypass)
+text = msg.as_string()
+server.sendmail(fromaddr, to_address, text)
+server.quit()
 
 @decorator_loggin
 def generate_post(token):
