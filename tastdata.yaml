@@ -3,3 +3,9 @@ sleep_time: 15
 addres: https://test-stand.gb.ru/login
 user_name: NV12
 passwd: 202f5d8c2c
+
+username: NV12
+passwd: 202f5d8c2c
+url_login: https://test-stand.gb.ru/gateway/login
+url_post: https://test-stand.gb.ru/api/posts
+url_profil: https://test-stand.gb.ru/user/profile
