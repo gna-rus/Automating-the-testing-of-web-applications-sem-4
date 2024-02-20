@@ -14,19 +14,13 @@ import requests
 from logger import log_all
 import logging
 
-FORMAT = '{levelname:<8} - {asctime}. В модуле "{name}" в строке {lineno:03d} функция "{funcName}()" в {created} секунд записала сообщение: {msg}'
-
+FORMAT = '{levelname:<8} - {asctime}. In modul "{name}", in line {lineno:03d}, funcName "{funcName}()" in {created} sec, message: {msg}'
 logging.basicConfig(format=FORMAT, style='{',filename='project.log', filemode='w', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
-
-logging.basicConfig(level=logging.INFO)
+handler = logging.FileHandler('Img_To_Local_Python.log', 'w', 'utf-8')
 logger = logging.getLogger('Логгирование')
 logger.info('___')
 
-FORMAT = '{levelname:<8} - {asctime}. В модуле "{name}" в строке {lineno:03d} функция "{funcName}()" в {created} секунд записала сообщение: {msg}'
-logging.basicConfig(format=FORMAT, style='{',filename='project.log.', filemode='w', encoding='utf-8', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
-# logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('Логгирование')
-logger.info('___')
+
 
 with open("./locators.yaml") as f:
     locators = yaml.safe_load(f)
@@ -296,12 +290,12 @@ def test_generate_post_content():
 # from email.mime.text import MIMEText
 # from email.mime.application import MIMEApplication
 #
-# fromaddr = " address@mail.ru "
-# to_address = " addresss@mail.ru "
+# fromaddr = " testovich.77@list.ru"
+# to_address = " gnarus@inbox.ru "
 # mypass = "bypass"
 # report_name = "report.xml"
 # msg = MIMEMultipart()
-# msg['From'] = fromaddr
+# msg['From'] =
 # msg['To'] = to_address
 # msg['Subject'] = "Привет от питона"
 #
@@ -320,9 +314,6 @@ def test_generate_post_content():
 # text = msg.as_string()
 # server.sendmail(fromaddr, to_address, text)
 # server.quit()
-
-
-log_all()
 
 
 log_all()
