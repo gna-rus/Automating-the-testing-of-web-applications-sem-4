@@ -1,10 +1,20 @@
-import pytest
-from Task_1_sem_3 import Site
-import yaml
+import functools
 
+import pytest
+from Task1_sem4 import Site
+import yaml
+import json
+import requests
 
 with open('testdata.yaml') as f:
     testdata = yaml.safe_load(f)
+
+
+
+
+
+
+####
 
 
 @pytest.fixture
@@ -14,6 +24,7 @@ def path_login():
     # input1.send_keys("test")
     return x_selector1
 
+@pytest.fixture
 def path_passwd():
     x_selector2 = "//*[@id='login']/div[2]/label/input"
     # input2 = site.find_element("xpath", x_selector2)
