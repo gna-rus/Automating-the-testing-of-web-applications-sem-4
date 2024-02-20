@@ -10,13 +10,6 @@ with open('testdata.yaml') as f:
     testdata = yaml.safe_load(f)
 
 
-
-
-
-
-####
-
-
 @pytest.fixture
 def path_login():
     x_selector1 = "//*[@id='login']/div[1]/label/input"

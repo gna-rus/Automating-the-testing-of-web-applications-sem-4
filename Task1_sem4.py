@@ -15,11 +15,18 @@ from logger import log_all
 import logging
 
 FORMAT = '{levelname:<8} - {asctime}. В модуле "{name}" в строке {lineno:03d} функция "{funcName}()" в {created} секунд записала сообщение: {msg}'
+
+logging.basicConfig(format=FORMAT, style='{',filename='project.log', filemode='w', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('Логгирование')
+logger.info('___')
+
+FORMAT = '{levelname:<8} - {asctime}. В модуле "{name}" в строке {lineno:03d} функция "{funcName}()" в {created} секунд записала сообщение: {msg}'
 logging.basicConfig(format=FORMAT, style='{',filename='project.log.', filemode='w', encoding='utf-8', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('Логгирование')
 logger.info('___')
-
 
 with open("./locators.yaml") as f:
     locators = yaml.safe_load(f)
@@ -91,39 +98,35 @@ class Site:
         self.driver.close()
 
 class Side_API:
-    def decorator_loggin(self, func):
-        @functools.wraps(func)
-        def wrapper():
-            response_post = requests.post(testdata['url_login'],
-                                          data={'username': testdata['username'], 'password': testdata['passwd']})
-            return func(response_post.json()['token'])
-        return wrapper
 
-    @decorator_loggin
+    def get_token(self):
+        response_post = requests.post(testdata['url_login'], data={'username': testdata['username'], 'password': testdata['passwd']})
+        return response_post.json()['token']
+
     def generate_post(self, token = 0):
+
         # функция создающая пост
         in_post = {"title": "test_title", "description": "test_description",
                    "content": "test_content"}  # передаваемые данные
 
         # передача поста (передается токкен регистрации и данные)
-        response_post = requests.post(testdata['url_post'], headers={"X-Auth-Token": token}, data=in_post)
+        response_post = requests.post(testdata['url_post'], headers={"X-Auth-Token": self.get_token()}, data=in_post)
         answer_code = response_post.status_code
         return response_post.json(), answer_code
 
-    @decorator_loggin
+
     def find_post(self, token = 0):
-        resource = requests.get(testdata['url_profil'], headers={"X-Auth-Token": token})
+        resource = requests.get(testdata['url_profil'], headers={"X-Auth-Token": self.get_token()})
         return resource.json()
 
-    @decorator_loggin
+
     def get_post(self, token = 0):
         # возрвращае состояние поста
-        resource = requests.get(testdata['url_post'], headers={"X-Auth-Token": token}, params={"owner": "notMe"})
+        resource = requests.get(testdata['url_post'], headers={"X-Auth-Token": self.get_token()}, params={"owner": "notMe"})
         return resource.json()
 
     def find_id(self, find_id = 0):
         # функция ищет переданный в нее id в посте
-
         result = self.get_post()
         flag = False
         for item in result['data']:
@@ -140,29 +143,38 @@ with open("./testdata.yaml") as f:
     passwd = testdata['passwd']
     addres = testdata['addres']
 
+# файл конфигурации теста
+with open("./testdata.yaml") as f:
+    testdata = yaml.safe_load(f)
+    browser = testdata["browser"]
+    username = testdata['user_name']
+    passwd = testdata['passwd']
+    addres = testdata['addres']
 
 test_API = Side_API()
 
+
 def test_find_id():
-    site_bed = Site(testdata["browser"], testdata['addres'])
     #Тест на поиск id в ответе
-    assert test_API.find_id(98745) == True, 'Test of find id - False'
+    assert test_API.find_id(98826) == True, 'Test of find id - False'
 
 def test_generate_post_code():
     #Тест на определение кода ответа
-    assert test_API.generate_post[1] == 200, 'Test code of generate post - False'
+    print(test_API.generate_post)
+    assert test_API.generate_post()[1] == 200, 'Test code of generate post - False'
 
 def test_generate_post_title():
     # Тест на поиск Title в созданном посте
-    assert test_API.generate_post[0]['title'] == 'test_title', 'Test: Title - False'
+
+    assert test_API.generate_post()[0]['title'] == 'test_title', 'Test: Title - False'
 
 def test_generate_post_description():
     # Тест на поиск description в созданном посте
-    assert test_API.generate_post[0]['description'] == 'test_description', 'Test: Description - False'
+    assert test_API.generate_post()[0]['description'] == 'test_description', 'Test: Description - False'
 
 def test_generate_post_content():
     # Тест на поиск content в созданном посте
-    assert test_API.generate_post[0]['content'] == 'test_content', 'Test: Content - False'
+    assert test_API.generate_post()[0]['content'] == 'test_content', 'Test: Content - False'
 
 # def test_step1():
 #     # Тест при не правильном вводе данных пользователя
@@ -308,6 +320,9 @@ def test_generate_post_content():
 # text = msg.as_string()
 # server.sendmail(fromaddr, to_address, text)
 # server.quit()
+
+
+log_all()
 
 
 log_all()
