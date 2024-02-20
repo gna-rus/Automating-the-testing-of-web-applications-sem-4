@@ -16,8 +16,8 @@ import logging
 
 FORMAT = '{levelname:<8} - {asctime}. В модуле "{name}" в строке {lineno:03d} функция "{funcName}()" в {created} секунд записала сообщение: {msg}'
 logging.basicConfig(format=FORMAT, style='{',filename='project.log.', filemode='w', encoding='utf-8', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('Логгирование:')
+# logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('Логгирование')
 logger.info('___')
 
 
@@ -100,7 +100,7 @@ class Side_API:
         return wrapper
 
     @decorator_loggin
-    def generate_post(self, token):
+    def generate_post(self, token = 0):
         # функция создающая пост
         in_post = {"title": "test_title", "description": "test_description",
                    "content": "test_content"}  # передаваемые данные
@@ -111,18 +111,19 @@ class Side_API:
         return response_post.json(), answer_code
 
     @decorator_loggin
-    def find_post(self, token):
+    def find_post(self, token = 0):
         resource = requests.get(testdata['url_profil'], headers={"X-Auth-Token": token})
         return resource.json()
 
     @decorator_loggin
-    def get_post(self, token):
+    def get_post(self, token = 0):
         # возрвращае состояние поста
         resource = requests.get(testdata['url_post'], headers={"X-Auth-Token": token}, params={"owner": "notMe"})
         return resource.json()
 
-    def find_id(self, find_id):
+    def find_id(self, find_id = 0):
         # функция ищет переданный в нее id в посте
+
         result = self.get_post()
         flag = False
         for item in result['data']:
@@ -140,9 +141,7 @@ with open("./testdata.yaml") as f:
     addres = testdata['addres']
 
 
-
 test_API = Side_API()
-
 
 def test_find_id():
     site_bed = Site(testdata["browser"], testdata['addres'])
