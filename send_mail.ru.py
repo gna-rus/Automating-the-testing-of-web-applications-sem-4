@@ -3,17 +3,20 @@ from os.path import basename
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
+import yaml
 
-fromaddr = "testovich.77@list.ru" # от кого
-to_address = "gnarus@inbox.ru" # кому
-# mypass = 'qwertyu12345!'
-mypass = "kCJtpCZwCvtdy5zhXFZM" # пароль для отправки отчета
+with open("./testdata.yaml") as f:
+    testdata = yaml.safe_load(f)
+
+fromaddr = testdata['mail_user'] # от кого
+to_address = testdata['mail_for_report'] # кому
+mypass = testdata['mail_pass'] # пароль для отправки отчета
 report_name = "project.log" # имя файла с отчетом
 
 msg = MIMEMultipart()
 msg['From'] = fromaddr
 msg['To'] = to_address
-msg['Subject'] = "Привет от питона"
+msg['Subject'] = "Отчет по автотестам"
 
 # Формирования отчета-файла
 with open(report_name, "rb") as f:
@@ -21,7 +24,7 @@ with open(report_name, "rb") as f:
     part['Content-Disposition'] = 'attachment; filename="%s"' % basename(report_name)
     msg.attach(part)
 
-body = f"Отчет о автотестах"
+body = f"Отчет по автотестам"
 msg.attach(MIMEText(body, 'plain'))
 
 # Передача отчета-файла (у mail.ru используется SSL шифрование)
