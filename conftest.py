@@ -46,6 +46,3 @@ def site_connect():
 @pytest.fixture
 def result():
     return "401"
-
-
-
