@@ -10,6 +10,6 @@ url_login: https://test-stand.gb.ru/gateway/login
 url_post: https://test-stand.gb.ru/api/posts
 url_profil: https://test-stand.gb.ru/user/profile
 
-mail_user: testovich.77@list.ru
-mail_pass_user:
-mail_pass: kCJtpCZwCvtdy5zhXFZM
+mail_user: ---
+mail_pass: ---
+mail_for_report: ---
