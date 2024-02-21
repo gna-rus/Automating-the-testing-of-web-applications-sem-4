@@ -20,9 +20,6 @@ FORMAT = '{levelname:<8} - {asctime}. In modul "{name}", in line {lineno:03d}, f
 logging.basicConfig(format=FORMAT, style='{',filename='project.log', filemode='w', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
 handler = logging.FileHandler('Img_To_Local_Python.log', 'w', 'utf-8')
 logger = logging.getLogger('Логгирование')
-logger.info('___')
-
-
 
 with open("./locators.yaml") as f:
     locators = yaml.safe_load(f)
@@ -31,26 +28,31 @@ class Site:
     # проверка на то какой браузер используется в тесте
     def __init__(self, browser, address):
         logger.info('Инициализация теста')
-        self.browser = browser
-        self.address = address
-
-        if self.browser == 'chrome':
-            logger.info('Browser: Chrome')
-            self.driver = webdriver.Chrome()
-        elif self.browser == 'firefox':
-            logger.info('Browser: Firefox')
-            self.driver = webdriver.Chrome()
-
-        self.driver.implicitly_wait(testdata['sleep_time'])
-        self.driver.maximize_window()
-        self.driver.get(address)
+        try:
+            self.browser = browser
+            self.address = address
+    
+            if self.browser == 'chrome':
+                logger.info('Browser: Chrome')
+                self.driver = webdriver.Chrome()
+            elif self.browser == 'firefox':
+                logger.info('Browser: Firefox')
+                self.driver = webdriver.Chrome()
+    
+            self.driver.implicitly_wait(testdata['sleep_time'])
+            self.driver.maximize_window()
+            self.driver.get(address)
+        except BaseException as err:
+            logging.exception(f"Критическая ошибка: {err}")
 
 
     def registration_on_the_website(self):
+        logger.info('Ввод Username')
         x_selector1 = locators['LOCATOR_USER_NAME']  # вводим Username
         input1 = self.find_element("xpath", x_selector1)
         input1.send_keys(username)
 
+        logger.info('Ввод Password')
         x_selector2 = locators['LOCATOR_PASSWORD']  # вводим passwd
         input2 = self.find_element("xpath", x_selector2)
         input2.send_keys(passwd)
@@ -60,10 +62,12 @@ class Site:
         btn.click()
 
     def bed_registration_on_the_website(self):
+        logger.info('Ввод Username')
         x_selector1 = locators['LOCATOR_USER_NAME']  # вводим Username
         input1 = self.find_element("xpath", x_selector1)
         input1.send_keys("test")
 
+        logger.info('Ввод Password')
         x_selector2 = locators['LOCATOR_PASSWORD']  # вводим passwd
         input2 = self.find_element("xpath", x_selector2)
         input2.send_keys("test")
@@ -74,33 +78,41 @@ class Site:
 
 
     def find_element(self, mode, path):
-        print(f'find element, {mode} = {path}')
-        if mode == "css":
-            element = self.driver.find_element(By.CSS_SELECTOR, path)
-        elif mode == "xpath":
-            element = self.driver.find_element(By.XPATH, path)
-        else:
-            element = None
-        return element
+        logger.info(f'Ввод {mode}-элемента: {path}')
+        try:
+            if mode == "css":
+                element = self.driver.find_element(By.CSS_SELECTOR, path)
+            elif mode == "xpath":
+                element = self.driver.find_element(By.XPATH, path)
+            else:
+                logging.error(f"Указан неправильный {mode = }")
+                element = None
+            return element
+        except BaseException as err:
+            logging.exception(f"Критическая ошибка: {err}")
+
 
     def get_element_property(self, mode, path, property):
         element = self.find_element(mode, path)
         return element.value_of_css_property(property)
 
     def go_to_site(self):
+        logger.info(f'Переход на сайт')
         return self.driver.get(self.address)
 
     def close(self):
+        logger.info(f'Закрытие окна браузера')
         self.driver.close()
 
 class Side_API:
 
     def get_token(self):
+        logger.info(f'Генерируется токен')
         response_post = requests.post(testdata['url_login'], data={'username': testdata['username'], 'password': testdata['passwd']})
         return response_post.json()['token']
 
-    def generate_post(self, token = 0):
-
+    def generate_post(self):
+        logger.info(f'Создается пост')
         # функция создающая пост
         in_post = {"title": "test_title", "description": "test_description",
                    "content": "test_content"}  # передаваемые данные
@@ -111,18 +123,20 @@ class Side_API:
         return response_post.json(), answer_code
 
 
-    def find_post(self, token = 0):
+    def find_post(self):
+        logger.info(f'Поиск ранее созданного поста')
         resource = requests.get(testdata['url_profil'], headers={"X-Auth-Token": self.get_token()})
         return resource.json()
 
-
-    def get_post(self, token = 0):
+    def get_post(self):
         # возрвращае состояние поста
+        logger.info(f'Определяется состояние поста')
         resource = requests.get(testdata['url_post'], headers={"X-Auth-Token": self.get_token()}, params={"owner": "notMe"})
         return resource.json()
 
     def find_id(self, find_id = 0):
         # функция ищет переданный в нее id в посте
+        logger.info(f'Поиск id поста')
         result = self.get_post()
         flag = False
         for item in result['data']:
@@ -139,41 +153,36 @@ with open("./testdata.yaml") as f:
     passwd = testdata['passwd']
     addres = testdata['addres']
 
-# файл конфигурации теста
-with open("./testdata.yaml") as f:
-    testdata = yaml.safe_load(f)
-    browser = testdata["browser"]
-    username = testdata['user_name']
-    passwd = testdata['passwd']
-    addres = testdata['addres']
-
 test_API = Side_API()
-
 
 def test_find_id():
     #Тест на поиск id в ответе
+    logger.info(f'API тест на поиск корректного id')
     assert test_API.find_id(98826) == True, 'Test of find id - False'
 
 def test_generate_post_code():
     #Тест на определение кода ответа
-    print(test_API.generate_post)
+    logger.info(f'API тест на код ответа 200')
     assert test_API.generate_post()[1] == 200, 'Test code of generate post - False'
 
 # def test_generate_post_title():
 #     # Тест на поиск Title в созданном посте
-#
+#     logger.info(f'API тест генерацию title в посте')
 #     assert test_API.generate_post()[0]['title'] == 'test_title', 'Test: Title - False'
 #
 # def test_generate_post_description():
 #     # Тест на поиск description в созданном посте
+#     logger.info(f'API тест генерацию description в посте')
 #     assert test_API.generate_post()[0]['description'] == 'test_description', 'Test: Description - False'
 #
 # def test_generate_post_content():
 #     # Тест на поиск content в созданном посте
+    # logger.info(f'API тест генерацию content в посте')
 #     assert test_API.generate_post()[0]['content'] == 'test_content', 'Test: Content - False'
 
 # def test_step1():
 #     # Тест при не правильном вводе данных пользователя
+#     logger.info(f'Тест на вход с неправильным Username и Password')
 #     site_bed = Site(testdata["browser"], testdata['addres'])
 #     site_bed.bed_registration_on_the_website()
 #
@@ -191,7 +200,7 @@ def test_generate_post_code():
 #
 # def test_step2(site_connect):
 #     # Тест при правильном вводе данных пользователя
-#
+#     logger.info(f'Тест на вход с правильным Username и Password')
 #     # Ищу слово Blog, которое высвечивается после успешной регистрации
 #     site_connect.registration_on_the_website()
 #     x_selector3 = locators['LOCATOR_WORD_BLOCK']
@@ -202,7 +211,7 @@ def test_generate_post_code():
 #
 # def test_step3(site_connect):
 #     # Тест создание нового поста
-#
+#      logger.info(f'Тест на создание нового поста')
 #     # Нажимаю на кнопку Нового поста
 #
 #     btn_selector = locators['LOCATOR_BOTTOM_NEWPOST']
@@ -244,7 +253,7 @@ def test_generate_post_code():
 #     assert flag_name_post.text == "test_titel"
 #
 # def test_step4(site_connect):
-#     a = True
+#     logger.info(f'Тест на заполнение Contact Us и поиск Alarm сообщения')
 #     btn_selector = locators['LOCATOR_BOTTOM_CONTACT']
 #     btn = site_connect.find_element("xpath", btn_selector)
 #     btn.click()
@@ -281,43 +290,6 @@ def test_generate_post_code():
 #     time.sleep(2)
 #     assert alert_text == 'Form successfully submitted'
 
-################
-
 
 log_all()
-
-import smtplib
-from os.path import basename
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-
-fromaddr = "testovich.77@list.ru" # от кого
-to_address = "gnarus@inbox.ru" # кому
-# mypass = 'qwertyu12345!'
-mypass = "kCJtpCZwCvtdy5zhXFZM" # пароль для отправки отчета
-report_name = "project.log" # имя файла с отчетом
-
-msg = MIMEMultipart()
-msg['From'] = fromaddr
-msg['To'] = to_address
-msg['Subject'] = "Привет от питона"
-
-# Формирования отчета-файла
-with open(report_name, "rb") as f:
-    part = MIMEApplication(f.read(), Name=basename(report_name))
-    part['Content-Disposition'] = 'attachment; filename="%s"' % basename(report_name)
-    msg.attach(part)
-
-body = f"Отчет о автотестах"
-msg.attach(MIMEText(body, 'plain'))
-
-# Передача отчета-файла (у mail.ru используется SSL шифрование)
-server = smtplib.SMTP('smtp.mail.ru', 465)
-server.starttls()
-server.login(fromaddr, mypass) # передача логина и пароля почты с которой будет отправка происходить
-text = msg.as_string()
-server.sendmail(fromaddr, to_address, text) # команда отправки отчета
-server.quit()
-
 
