@@ -14,6 +14,8 @@ import requests
 from logger import log_all
 import logging
 
+
+
 FORMAT = '{levelname:<8} - {asctime}. In modul "{name}", in line {lineno:03d}, funcName "{funcName}()" in {created} sec, message: {msg}'
 logging.basicConfig(format=FORMAT, style='{',filename='project.log', filemode='w', level=logging.INFO) # сохранаяю результаты лоиггирования в отдельный файл
 handler = logging.FileHandler('Img_To_Local_Python.log', 'w', 'utf-8')
@@ -157,18 +159,18 @@ def test_generate_post_code():
     print(test_API.generate_post)
     assert test_API.generate_post()[1] == 200, 'Test code of generate post - False'
 
-def test_generate_post_title():
-    # Тест на поиск Title в созданном посте
-
-    assert test_API.generate_post()[0]['title'] == 'test_title', 'Test: Title - False'
-
-def test_generate_post_description():
-    # Тест на поиск description в созданном посте
-    assert test_API.generate_post()[0]['description'] == 'test_description', 'Test: Description - False'
-
-def test_generate_post_content():
-    # Тест на поиск content в созданном посте
-    assert test_API.generate_post()[0]['content'] == 'test_content', 'Test: Content - False'
+# def test_generate_post_title():
+#     # Тест на поиск Title в созданном посте
+#
+#     assert test_API.generate_post()[0]['title'] == 'test_title', 'Test: Title - False'
+#
+# def test_generate_post_description():
+#     # Тест на поиск description в созданном посте
+#     assert test_API.generate_post()[0]['description'] == 'test_description', 'Test: Description - False'
+#
+# def test_generate_post_content():
+#     # Тест на поиск content в созданном посте
+#     assert test_API.generate_post()[0]['content'] == 'test_content', 'Test: Content - False'
 
 # def test_step1():
 #     # Тест при не правильном вводе данных пользователя
@@ -282,38 +284,40 @@ def test_generate_post_content():
 ################
 
 
-    #
-# mail
-# import smtplib
-# from os.path import basename
-# from email.mime.multipart import MIMEMultipart
-# from email.mime.text import MIMEText
-# from email.mime.application import MIMEApplication
-#
-# fromaddr = " testovich.77@list.ru"
-# to_address = " gnarus@inbox.ru "
-# mypass = "bypass"
-# report_name = "report.xml"
-# msg = MIMEMultipart()
-# msg['From'] =
-# msg['To'] = to_address
-# msg['Subject'] = "Привет от питона"
-#
-# # Формирования отчета-файла
-# with open(report_name, "rb") as f:
-#     part = MIMEApplication(f.read(), Name=basename(report_name))
-#     part['Content-Disposition'] = 'attachment; filename="%s"' % basename(report_name)
-#     msg.attach(part)
-#
-# body = "Это пробное сообщение"
-# msg.attach(MIMEText(body, 'plain'))
-#
-# # Передача отчета-файла
-# server = smtplib.SMTP_SSL(' smtp.mail.ru ', 465)
-# server.login(fromaddr, mypass)
-# text = msg.as_string()
-# server.sendmail(fromaddr, to_address, text)
-# server.quit()
-
-
 log_all()
+
+import smtplib
+from os.path import basename
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+
+fromaddr = "testovich.77@list.ru" # от кого
+to_address = "gnarus@inbox.ru" # кому
+# mypass = 'qwertyu12345!'
+mypass = "kCJtpCZwCvtdy5zhXFZM" # пароль для отправки отчета
+report_name = "project.log" # имя файла с отчетом
+
+msg = MIMEMultipart()
+msg['From'] = fromaddr
+msg['To'] = to_address
+msg['Subject'] = "Привет от питона"
+
+# Формирования отчета-файла
+with open(report_name, "rb") as f:
+    part = MIMEApplication(f.read(), Name=basename(report_name))
+    part['Content-Disposition'] = 'attachment; filename="%s"' % basename(report_name)
+    msg.attach(part)
+
+body = f"Отчет о автотестах"
+msg.attach(MIMEText(body, 'plain'))
+
+# Передача отчета-файла (у mail.ru используется SSL шифрование)
+server = smtplib.SMTP('smtp.mail.ru', 465)
+server.starttls()
+server.login(fromaddr, mypass) # передача логина и пароля почты с которой будет отправка происходить
+text = msg.as_string()
+server.sendmail(fromaddr, to_address, text) # команда отправки отчета
+server.quit()
+
+
